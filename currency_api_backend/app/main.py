@@ -33,10 +33,15 @@ def parse_currency_data(html):
             bank_name = columns[0].text.strip().split('\n')[0]
             buying_price = columns[1].text.strip()
             selling_price = columns[2].text.strip().split('\n')[0]
+            bank_name=(bank_name.replace('İ','I')
+                                .replace('Ş','S')
+                                .replace('Ü','U')
+                                .replace('Ç','C'))
+
             currency_data.append({
-                "Bank": bank_name,
-                "Buying Price": float(buying_price),
-                "Selling Price": float(selling_price)
+                "bank": bank_name,
+                "buy": float(buying_price),
+                "sell": float(selling_price)
             })
     return currency_data
 
@@ -46,6 +51,7 @@ def get_rates():
     for label, url in URLS.items():
         try:
             response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"})
+            response.encoding = "utf-8"
             response.raise_for_status()
             result[label] = parse_currency_data(response.text)
         except Exception as e:

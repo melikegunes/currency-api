@@ -20,6 +20,7 @@ URLS = {
     "gumus": "https://canlidoviz.com/altin-fiyatlari/kapali-carsi/gumus",
     "usd": "https://canlidoviz.com/doviz-kurlari/dolar",
     "eur": "https://canlidoviz.com/doviz-kurlari/euro",
+    "gbp":"https://canlidoviz.com/doviz-kurlari/ingiliz-sterlini",
     "bilezik": "https://canlidoviz.com/altin-fiyatlari/kapali-carsi/22-ayar-bilezik"
 }
 

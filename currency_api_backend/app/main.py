@@ -15,11 +15,12 @@ app.add_middleware(
 )
 
 URLS = {
-    "Gold": "https://canlidoviz.com/altin-fiyatlari/kapali-carsi/gram-altin",
-    "Gumus": "https://canlidoviz.com/altin-fiyatlari/kapali-carsi/gumus",
-    "USD": "https://canlidoviz.com/doviz-kurlari/dolar",
-    "EUR": "https://canlidoviz.com/doviz-kurlari/euro",
-    "Bilezik": "https://canlidoviz.com/altin-fiyatlari/kapali-carsi/22-ayar-bilezik"
+    "gold": "https://canlidoviz.com/altin-fiyatlari/kapali-carsi/gram-altin",
+    "ceyrekaltin":"https://canlidoviz.com/altin-fiyatlari/ceyrek-altin",
+    "gumus": "https://canlidoviz.com/altin-fiyatlari/kapali-carsi/gumus",
+    "usd": "https://canlidoviz.com/doviz-kurlari/dolar",
+    "eur": "https://canlidoviz.com/doviz-kurlari/euro",
+    "bilezik": "https://canlidoviz.com/altin-fiyatlari/kapali-carsi/22-ayar-bilezik"
 }
 
 def parse_currency_data(html):
@@ -57,3 +58,15 @@ def get_rates():
         except Exception as e:
             result[label] = {"error": str(e)}
     return {"status": "success", "data": result}
+
+@app.get("/api/rates/{asset}")
+def get_asset_rates(asset: str):
+    asset = asset.lower()
+    try:
+        response = requests.get(URLS[asset], headers={"User-Agent": "Mozilla/5.0"})
+        response.raise_for_status()
+        data = parse_currency_data(response.text)
+        return {"status": "success", "asset": asset, "data": data}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+

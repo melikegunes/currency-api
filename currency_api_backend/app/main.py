@@ -110,8 +110,8 @@ def parse_currency_data(html):
         columns = row.find_all("td")
         if columns:
             bank_name = columns[0].text.strip().split('\n')[0]
-            buying_price = columns[1].text.strip().replace('.', '').replace(',', '.')
-            selling_price = columns[2].text.strip().split('\n')[0].replace('.', '').replace(',', '.')
+            buy_text = columns[1].text.strip().split('\n')[0]
+            sell_text = columns[2].text.strip().split('\n')[0]
             
             bank_name=(bank_name.replace('İ','I')
                                 .replace('Ş','S')
@@ -119,10 +119,35 @@ def parse_currency_data(html):
                                 .replace('Ç','C'))
 
             try:
+                # Robust cleaning function
+                def parse_price(text):
+                    # Remove currency symbols and whitespace
+                    text = text.replace('TL', '').replace('$', '').replace('€', '').strip()
+                    if ',' in text and '.' in text:
+                        # If both present, assume last one is decimal
+                        if text.rfind(',') > text.rfind('.'):
+                            # 1.234,56 -> remove dot, replace comma with dot
+                            text = text.replace('.', '').replace(',', '.')
+                        else:
+                            # 1,234.56 -> remove comma
+                            text = text.replace(',', '')
+                    elif ',' in text:
+                        # 43,5120 -> 43.5120 (Turkey standard)
+                        text = text.replace(',', '.')
+                    # If only dots, leaving it might be risky if it's 1.200 (1200) vs 1.200 (1.2).
+                    # But usually canlidoviz uses comma for decimal. 
+                    # If it was 43.5290 and we got 435290, it means we stripped the dot.
+                    # So if only dot is present, we should KEEP it if it looks like a decimal (small number)
+                    # or strip it if thousands. 
+                    # However, safer to assume it's a decimal if the resulting number is massive otherwise?
+                    # Let's trust that clean float conversion works on "43.5290".
+                    
+                    return float(text)
+
                 currency_data.append({
                     "bank": bank_name,
-                    "buy": float(buying_price),
-                    "sell": float(selling_price)
+                    "buy": parse_price(buy_text),
+                    "sell": parse_price(sell_text)
                 })
             except ValueError:
                 continue

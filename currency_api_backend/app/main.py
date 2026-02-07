@@ -173,10 +173,18 @@ def fetch_altinkaynak_data():
                 sell_raw = item.get("Satis", "0")
                 
                 try:
+                    buy_price = clean_price(buy_raw)
+                    sell_price = clean_price(sell_raw)
+
+                    # Normalize Silver (AG1000) from KG to Gram
+                    if kod == "AG1000" or kod == "AG_T":
+                         buy_price /= 1000.0
+                         sell_price /= 1000.0
+
                     results[kod] = {
                         "bank": "Altinkaynak",
-                        "buy": clean_price(buy_raw),
-                        "sell": clean_price(sell_raw)
+                        "buy": buy_price,
+                        "sell": sell_price
                     }
                 except (ValueError, TypeError):
                     continue
